@@ -7,7 +7,7 @@ import {
 } from "cloudflare:workers";
 import { pages, sites } from "../db/schema";
 import { eq } from "drizzle-orm";
-import { scrapeSiteWorkflow } from "../scrape";
+import { scrapeSite } from "../scrape";
 import { AI_MODELS } from "../constants";
 
 export type RagWorflowParams = {
@@ -32,8 +32,6 @@ export class RagWorkflow extends WorkflowEntrypoint<Env, RagWorflowParams> {
         .limit(1);
     });
 
-    console.log("exising site step done");
-
     const siteId = existingSite[0]?.id
       ? existingSite[0].id
       : await step.do("Insert a new site", async () => {
@@ -47,8 +45,6 @@ export class RagWorkflow extends WorkflowEntrypoint<Env, RagWorflowParams> {
           return newSite[0].siteId;
         });
 
-    console.log("siteId step done");
-
     const scrapingConfig = {
       db,
       baseURL: event.payload.url,
@@ -59,10 +55,8 @@ export class RagWorkflow extends WorkflowEntrypoint<Env, RagWorflowParams> {
     };
 
     const results = await step.do("Scrape site", async () => {
-      return await scrapeSiteWorkflow(step, scrapingConfig);
+      return await scrapeSite(step, scrapingConfig);
     });
-
-    console.log("scraping step done");
 
     const newPages = await step.do(
       "Inasert scraped pages",
@@ -83,8 +77,6 @@ export class RagWorkflow extends WorkflowEntrypoint<Env, RagWorflowParams> {
           })
         )
     );
-
-    console.log("insert new pages step done");
 
     await step.do("Generate vector embeddings for each page", async () => {
       await Promise.all(
@@ -112,15 +104,11 @@ export class RagWorkflow extends WorkflowEntrypoint<Env, RagWorflowParams> {
       );
     });
 
-    console.log("generate embeddings step done");
-
     await step.do("Update site total pages", async () => {
       await db
         .update(sites)
         .set({ totalPages: results.length })
         .where(eq(sites.id, siteId));
     });
-
-    console.log("update site total pages step done");
   }
 }

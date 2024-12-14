@@ -1,0 +1,30 @@
+{
+  "name": "ai-docs-rag",
+  "scripts": {
+    "dev": "wrangler dev src/index.ts",
+    "deploy": "wrangler deploy --minify src/index.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx seed.ts",
+    "db:setup": "npm run db:generate && npm run db:migrate && npm run db:seed",
+    "db:studio": "drizzle-kit studio",
+    "fiberplane": "npx @fiberplane/studio@latest"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.1",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.36.4",
+    "hono": "^4.6.7",
+    "p-limit": "^6.1.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241205.0",
+    "@fiberplane/hono-otel": "^0.6.2",
+    "drizzle-kit": "^0.28.1",
+    "drizzle-seed": "^0.1.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4",
+    "wrangler": "^3.95.0"
+  },
+  "description": "I want to build a talk to documentation api where user will pass a base url to a docs site and the api will first scrape all the links on that site and also the content on that site and then it will go to the links from that site and do the same for all similar sites and then use workers ai to generate the verctor embeddings of the documents and train llms to answer based on the docs"
+}

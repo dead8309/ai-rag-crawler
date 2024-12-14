@@ -1,0 +1,1 @@
+ALTER TABLE "embeddings" ADD CONSTRAINT "embeddings_url_unique" UNIQUE("url");

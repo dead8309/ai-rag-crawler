@@ -1,6 +1,4 @@
 import pLimit from "p-limit";
-import { NeonHttpDatabase } from "drizzle-orm/neon-http";
-import { NeonQueryFunction } from "@neondatabase/serverless";
 import { SiteData, ProxyScraperResponse } from "./types";
 import { withRetries } from "./retry";
 import { WorkflowStep } from "cloudflare:workers";
@@ -15,15 +13,16 @@ const DEFAULT_OPTIONS = {
   maxConcurrency: 5,
 };
 
-type Database = NeonHttpDatabase<Record<string, never>> & {
-  $client: NeonQueryFunction<false, false>;
-};
-
-type ScraperOptions = {
-  db: Database;
+// type Database = NeonHttpDatabase<Record<string, never>> & {
+//   $client: NeonQueryFunction<false, false>;
+// };
+//
+//
+export type ScraperOptions = {
   baseURL: string;
   type: "browser" | "fetch";
   strict: boolean;
+  maxNumberOfPagesToScrape: number;
   maxDepth?: number;
   maxConcurrency?: number;
 };
@@ -32,6 +31,7 @@ export async function scrapeSite(
   step: WorkflowStep,
   {
     baseURL,
+    maxNumberOfPagesToScrape,
     type = DEFAULT_OPTIONS.type,
     strict = DEFAULT_OPTIONS.strict,
     maxDepth = DEFAULT_OPTIONS.maxDepth,
@@ -45,8 +45,7 @@ export async function scrapeSite(
 
   while (queue.length > 0) {
     const batch = queue.splice(0, maxConcurrency);
-    // NOTE: HARD LIMIT of 100 pages for now
-    if (processedUrls.size >= 100) {
+    if (processedUrls.size >= maxNumberOfPagesToScrape) {
       break;
     }
 

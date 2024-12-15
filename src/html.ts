@@ -37,7 +37,7 @@ export const HTML = `<!DOCTYPE html>
                 addMessage('You', message);
                 messageInput.value = '';
 
-                const response = await fetch('/api/sites/ask', {
+                const response = await fetch('/api/sites/ask/stream', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ site: currentUrl, question: message }),

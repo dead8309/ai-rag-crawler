@@ -5,20 +5,14 @@ import { Hono } from "hono";
 import { pages, sites } from "./db/schema";
 import { and, cosineDistance, desc, eq, gt, sql as rawSql } from "drizzle-orm";
 import { AI_MODELS, SYSTEM_PROMPT } from "./constants";
-import { RagWorflowParams, RagWorkflow } from "./workflows/rag";
+import { RagWorkflow } from "./workflows/rag";
 import { HTML } from "./html";
-
-type Bindings = {
-  DATABASE_URL: string;
-  AI: Ai;
-  RAG_WORKFLOW: Workflow<RagWorflowParams>;
-};
+import { Bindings } from "./types";
 
 const app = new Hono<{ Bindings: Bindings }>();
 
 app.get("/", (c) => {
-  // return c.text("Honc! 🪿");
-  return c.html(HTML);
+  return c.text("Honc! 🪿");
 });
 
 app.get("/api/sites", async (c) => {
@@ -138,14 +132,14 @@ app.post("/api/scrape/workflow", async (c) => {
     return c.json({ message: "URL is required" }, 400);
   }
   try {
-    const existingPage = await db
-      .select({ id: pages.id })
-      .from(pages)
-      .where(eq(pages.url, url))
+    const existingSite = await db
+      .select({ id: sites.id })
+      .from(sites)
+      .where(eq(sites.url, url))
       .limit(1);
 
-    if (existingPage.length > 0) {
-      return c.json({ message: "Page with this URL already exists" }, 400);
+    if (existingSite.length > 0) {
+      return c.json({ message: "Site with this URL already exists" }, 401);
     }
 
     let instance = await c.env.RAG_WORKFLOW.create({
@@ -178,6 +172,45 @@ app.get("/api/scrape/workflow/:id", async (c) => {
     const msg = `failed to get instance ${id}: ${e.message}`;
     console.error(msg);
     return c.json({ error: msg }, { status: 400 });
+  }
+});
+
+app.post("/api/pages/generate-embeddings", async (c) => {
+  const sql = neon(c.env.DATABASE_URL);
+  const db = drizzle(sql);
+  const { pageId } = await c.req.json();
+  if (!pageId) {
+    return c.json({ message: "Page ID is required" }, 400);
+  }
+  try {
+    const page = await db
+      .select({
+        title: pages.title,
+        text: pages.cleanedText,
+      })
+      .from(pages)
+      .where(eq(pages.id, pageId))
+      .limit(1);
+    if (page.length === 0) {
+      return c.json({ message: "Page not found" }, 404);
+    }
+    const { data } = await c.env.AI.run(AI_MODELS.embeddings, {
+      text: [page[0].title, page[0].text],
+    });
+    const values = data[0];
+    if (!values) {
+      return c.json({ message: "Embeddings not generated" }, 500);
+    }
+    await db
+      .update(pages)
+      .set({
+        embedding: values,
+      })
+      .where(eq(pages.id, pageId));
+
+    return c.json({ message: "Embeddings generated" });
+  } catch (error) {
+    return c.json({ "An Error Occured": error }, 500);
   }
 });
 

@@ -12,7 +12,8 @@ import { Bindings } from "./types";
 const app = new Hono<{ Bindings: Bindings }>();
 
 app.get("/", (c) => {
-  return c.text("Honc! 🪿");
+  // return c.text("Honc! 🪿");
+  return c.html(HTML);
 });
 
 app.get("/api/sites", async (c) => {

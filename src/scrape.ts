@@ -5,8 +5,8 @@ import { SiteData, ProxyScraperResponse } from "./types";
 import { withRetries } from "./retry";
 import { WorkflowStep } from "cloudflare:workers";
 
-// const PROXY_SCRAPER_URL = "https://vercel-puppeteer-proxy.vercel.app/api";
-const PROXY_SCRAPER_URL = "http://localhost:3000/api";
+const PROXY_SCRAPER_URL = "https://vercel-puppeteer-proxy.vercel.app/api";
+// const PROXY_SCRAPER_URL = "http://localhost:3000/api";
 
 const DEFAULT_OPTIONS = {
   type: "browser" as const,

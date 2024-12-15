@@ -6,6 +6,7 @@ import { pages, sites } from "./db/schema";
 import { and, cosineDistance, desc, eq, gt, sql as rawSql } from "drizzle-orm";
 import { AI_MODELS, SYSTEM_PROMPT } from "./constants";
 import { RagWorflowParams, RagWorkflow } from "./workflows/rag";
+import { HTML } from "./html";
 
 type Bindings = {
   DATABASE_URL: string;
@@ -16,7 +17,8 @@ type Bindings = {
 const app = new Hono<{ Bindings: Bindings }>();
 
 app.get("/", (c) => {
-  return c.text("Honc! 🪿");
+  // return c.text("Honc! 🪿");
+  return c.html(HTML);
 });
 
 app.get("/api/sites", async (c) => {
@@ -168,16 +170,41 @@ app.get("/api/scrape/workflow/:id", async (c) => {
   const id = c.req.param("id");
   try {
     let instance = await c.env.RAG_WORKFLOW.get(id);
-    return Response.json({
+    return c.json({
       id: instance.id,
       ...(await instance.status()),
     });
   } catch (e: any) {
     const msg = `failed to get instance ${id}: ${e.message}`;
     console.error(msg);
-    return Response.json({ error: msg }, { status: 400 });
+    return c.json({ error: msg }, { status: 400 });
   }
 });
+
+// NOTE: Can't do this as its not yet implemented by cloudflare themselves
+// {
+//  "error": "failed to get instance 25121daa-b71e-4b42-bfd3-240d4e3adc15: Not implemented yet"
+// }
+//
+// app.get("/api/scrape/workflow/:id/retry", async (c) => {
+//   const id = c.req.param("id");
+//   try {
+//     let instance = await c.env.RAG_WORKFLOW.get(id);
+//     const status = await instance.status();
+//     if (status.status !== "errored") {
+//       return c.json({ message: "Workflow is not in errored state" }, 400);
+//     }
+//     await instance.restart();
+//     return c.json({
+//       id: instance.id,
+//       ...(await instance.status()),
+//     });
+//   } catch (e: any) {
+//     const msg = `failed to get instance ${id}: ${e.message}`;
+//     console.error(msg);
+//     return c.json({ error: msg }, { status: 400 });
+//   }
+// });
 
 app.post("/api/sites/ask", async (c) => {
   const sql = neon<boolean, boolean>(c.env.DATABASE_URL);
@@ -225,16 +252,68 @@ app.post("/api/sites/ask", async (c) => {
       ],
     })) as { response: string };
 
-    return c.json({ message: response });
+    return c.json({ response });
   } catch (error) {
     return c.json({ "An Error Occured": error }, 500);
   }
 });
 
-// TODO: Implement streaming and real-time updates
-// Streaming: https://hono.dev/docs/helpers/streaming#streaming-helper
-// Realtime: https://developers.cloudflare.com/durable-objects/
-// https://fiberplane.com/blog/creating-websocket-server-hono-durable-objects/
+app.post("/api/sites/ask/stream", async (c) => {
+  const sql = neon<boolean, boolean>(c.env.DATABASE_URL);
+  const db = drizzle(sql);
+  const { question, site } = await c.req.json();
+  if (!site || !question) {
+    return c.json({ message: "Site URL and question are required" }, 400);
+  }
+  try {
+    const embedding = await c.env.AI.run(AI_MODELS.embeddings, {
+      text: [question],
+    });
+    const questionEmbedding = embedding.data[0];
+
+    const similarity = rawSql<number>`1 - (${cosineDistance(
+      pages.embedding,
+      questionEmbedding
+    )})`;
+
+    const relevantContext = await db
+      .select({
+        title: pages.title,
+        url: pages.url,
+        content: pages.cleanedText,
+        similarity,
+      })
+      .from(pages)
+      .innerJoin(sites, eq(pages.siteId, sites.id))
+      .where(and(eq(sites.url, site), gt(similarity, 0.3)))
+      .orderBy((t) => desc(t.similarity))
+      .limit(5);
+
+    const context =
+      relevantContext.length > 0
+        ? `Context:\n${relevantContext
+            .map((docs) => `${docs.url}\n\n${docs.title}\n\n${docs.content}\n`)
+            .join("\n")}`
+        : "";
+    console.log(context);
+
+    const aiStream = (await c.env.AI.run(AI_MODELS.text_generation, {
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT + context },
+        { role: "user", content: question },
+      ],
+      stream: true,
+    })) as ReadableStream;
+
+    return new Response(aiStream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+      },
+    });
+  } catch (error) {
+    return c.json({ "An Error Occured": error }, 500);
+  }
+});
 
 export { RagWorkflow };
 export default {

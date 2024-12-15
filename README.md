@@ -26,6 +26,10 @@ The ideal state is having a system that can effortlessly ingest documentation fr
 
 This project provides an automated RAG (Retrieval-Augmented Generation) pipeline built using serverless technologies. It takes a base URL of a documentation website, scrapes the site and all linked pages recursively, generates vector embeddings of the content, stores them in a database, and uses those embeddings to generate accurate, context-aware responses to questions. It uses _Cloudflare Workflows(Beta)_ thus providing a more resilient and scalable solution to the problem.
 
+## Demo
+
+https://www.loom.com/share/2aae4caf3dd148cca8e4ef178cfaf851?sid=b19b308e-b514-4610-8866-aae063b164d8
+
 ## ⛏️ Built With HONC🪿<a name = "tech_stack"></a>
 
 - [Hono](https://hono.dev/) - Web Framework

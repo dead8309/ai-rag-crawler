@@ -90,16 +90,15 @@ export class RagWorkflow extends WorkflowEntrypoint<Env, RagWorflowParams> {
             .where(eq(pages.id, pageId))
             .limit(1);
 
-          const embedding = await step.do(
-            `Generate embedding for page ${pageId}`,
-            async () => {
-              const { data } = await this.env.AI.run(AI_MODELS.embeddings, {
-                text: [page.title, page.text],
-              });
-              return data[0];
-            }
-          );
-          await db.update(pages).set({ embedding }).where(eq(pages.id, pageId));
+          await step.do(`Generate and Insert embedding for page ${pageId}`, async () => {
+            const { data } = await this.env.AI.run(AI_MODELS.embeddings, {
+              text: [page.title, page.text],
+            });
+            await db
+              .update(pages)
+              .set({ embedding: data[0] })
+              .where(eq(pages.id, pageId));
+          });
         })
       );
     });

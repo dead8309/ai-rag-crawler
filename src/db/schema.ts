@@ -1,6 +1,4 @@
-import { uniqueIndex } from "drizzle-orm/mysql-core";
 import {
-  jsonb,
   pgTable,
   serial,
   text,
@@ -9,18 +7,8 @@ import {
   vector,
 } from "drizzle-orm/pg-core";
 
-export type NewUser = typeof users.$inferInsert;
 export type NewSites = typeof sites.$inferInsert;
 export type NewPages = typeof pages.$inferInsert;
-
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  name: text("name"),
-  email: text("email"),
-  settings: jsonb("settings"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
 
 export const sites = pgTable("sites", {
   id: serial("id").primaryKey(),

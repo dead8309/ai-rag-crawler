@@ -6,7 +6,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx seed.ts",
-    "db:setup": "npm run db:generate && npm run db:migrate && npm run db:seed",
+    "db:setup": "npm run db:generate && npm run db:migrate",
     "db:studio": "drizzle-kit studio",
     "fiberplane": "npx @fiberplane/studio@latest"
   },

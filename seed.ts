@@ -11,9 +11,6 @@ const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);
 
 async function seedDatabase() {
-  // Seed users
-  await seed(db, schema.users);
-
   // Seed Pages
   await seed(db, schema.sites);
 

@@ -16,6 +16,8 @@
 ## 📝 Table of Contents
 
 - [About](#about)
+- [Api Flow](#api-flow)
+- [Demo](#demo)
 - [Technology Stack](#tech_stack)
 - [Setting up a local environment](#getting_started)
 - [Usage](#usage)
@@ -25,6 +27,10 @@
 The ideal state is having a system that can effortlessly ingest documentation from any website, understand its content semantically, and provide accurate, context-aware answers to user questions. This would allow for easy exploration and utilization of vast amounts of documentation without manual effort.
 
 This project provides an automated RAG (Retrieval-Augmented Generation) pipeline built using serverless technologies. It takes a base URL of a documentation website, scrapes the site and all linked pages recursively, generates vector embeddings of the content, stores them in a database, and uses those embeddings to generate accurate, context-aware responses to questions. It uses _Cloudflare Workflows(Beta)_ thus providing a more resilient and scalable solution to the problem.
+
+## Api Flow
+
+![image](https://github.com/user-attachments/assets/4012f9a4-550a-4881-a644-e42ae9d5fc31)
 
 ## Demo
 
@@ -156,4 +162,3 @@ To interact with the api locally, follow these steps:
 - **/api/sites/ask/stream (POST):** Asks a question about a specific documentation site and returns a streamed response which makes the AI response appear piece by piece.
   - `site`: (string, required) The URL of the documentation website that was previously scraped.
   - `question`: (string, required) The question you want to ask.
-

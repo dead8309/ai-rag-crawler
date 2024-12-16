@@ -13,10 +13,15 @@
     <br>
 </p>
 
+> [!NOTE]
+> 
+> See [How to use the frontend in live url](#how-to-use-the-frontend-in-live-url)
+
 ## 📝 Table of Contents
 
 - [About](#about)
 - [Api Flow](#api-flow)
+- [How to use the frontend in live url](#how-to-use-the-frontend-in-live-url)
 - [Demo](#demo)
 - [Technology Stack](#tech_stack)
 - [Setting up a local environment](#getting_started)
@@ -32,9 +37,30 @@ This project provides an automated RAG (Retrieval-Augmented Generation) pipeline
 
 ![image](https://github.com/user-attachments/assets/4012f9a4-550a-4881-a644-e42ae9d5fc31)
 
+## How to use the frontend in live url
+
+Currently the database has 1 site processed properly which is
+```
+https://fiberplane.com/docs/get-started/
+```
+So to use the frontend to ask questions:
+
+1. Head over to [https://ai-docs-rag.cjjdxhdjd.workers.dev/](https://ai-docs-rag.cjjdxhdjd.workers.dev/)
+2. Enter the following url word by word in the `Enter Url` input field
+   ```
+   https://fiberplane.com/docs/get-started/
+   ```
+3. Click on `Submit URL` button
+4. Enter the question you want to ask in `Ask about the URL..` field and hit `Send`
+5. You will get a streaming response from workers-ai.
+
+Alternatively you can also access all the apis through fiberplane studio to interact with the application. See [Usage](#usage)
+
+
 ## Demo
 
 https://www.loom.com/share/2aae4caf3dd148cca8e4ef178cfaf851?sid=b19b308e-b514-4610-8866-aae063b164d8
+
 
 ## ⛏️ Built With HONC🪿<a name = "tech_stack"></a>
 

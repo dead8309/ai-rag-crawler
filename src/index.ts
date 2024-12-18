@@ -1,10 +1,23 @@
 import { instrument } from "@fiberplane/hono-otel";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { Hono } from "hono";
-import { pages, sites } from "./db/schema";
-import { and, cosineDistance, desc, eq, gt, sql as rawSql } from "drizzle-orm";
-import { AI_MODELS, SYSTEM_PROMPT } from "./constants";
+import { pageChunks, pages, sites } from "./db/schema";
+import {
+  and,
+  cosineDistance,
+  count,
+  desc,
+  eq,
+  gt,
+  sql as rawSql,
+} from "drizzle-orm";
+import {
+  AI_MODELS,
+  SYSTEM_PROMPT,
+} from "./constants";
+
+import { cors } from "hono/cors";
+
 import { RagWorkflow } from "./workflows/rag";
 import { HTML } from "./html";
 import { Bindings } from "./types";
@@ -16,6 +29,15 @@ app.get("/", (c) => {
   return c.html(HTML);
 });
 
+app.use(
+    "/api/*",
+    cors({
+        origin: ["http://localhost:3001"],
+        maxAge: 600,
+        credentials: true,
+    })
+);
+
 app.get("/api/sites", async (c) => {
   const sql = neon(c.env.DATABASE_URL);
   const db = drizzle(sql);
@@ -23,11 +45,13 @@ app.get("/api/sites", async (c) => {
     .select({
       id: sites.id,
       url: sites.url,
-      totalPages: sites.totalPages,
+      totalPages: count(pages.id),
       createdAt: sites.createdAt,
       updatedAt: sites.updatedAt,
     })
-    .from(sites);
+    .from(sites)
+    .leftJoin(pages, eq(sites.id, pages.siteId))
+    .groupBy(sites.id, sites.url, sites.createdAt, sites.updatedAt);
 
   return c.json(rows);
 });
@@ -59,10 +83,12 @@ app.get("/api/sites/:siteId", async (c) => {
       .select({
         siteId: sites.id,
         siteUrl: sites.url,
-        totalPages: sites.totalPages,
+        totalPages: count(pages.id),
       })
       .from(sites)
-      .where(eq(sites.id, siteId));
+      .where(eq(sites.id, siteId))
+      .leftJoin(pages, eq(sites.id, pages.siteId))
+      .groupBy(sites.id);
 
     const pageRows = await db
       .select({
@@ -96,7 +122,8 @@ app.get("/api/pages/:pageId", async (c) => {
       .select()
       .from(pages)
       .where(eq(pages.id, pageId))
-      .limit(1);
+      .leftJoin(pageChunks, eq(pages.id, pageChunks.pageId));
+
     if (pageRow.length === 0) {
       return c.json({ message: "No page found" }, 404);
     }
@@ -176,44 +203,54 @@ app.get("/api/scrape/workflow/:id", async (c) => {
   }
 });
 
-app.post("/api/pages/generate-embeddings", async (c) => {
-  const sql = neon(c.env.DATABASE_URL);
-  const db = drizzle(sql);
-  const { pageId } = await c.req.json();
-  if (!pageId) {
-    return c.json({ message: "Page ID is required" }, 400);
-  }
-  try {
-    const page = await db
-      .select({
-        title: pages.title,
-        text: pages.cleanedText,
-      })
-      .from(pages)
-      .where(eq(pages.id, pageId))
-      .limit(1);
-    if (page.length === 0) {
-      return c.json({ message: "Page not found" }, 404);
-    }
-    const { data } = await c.env.AI.run(AI_MODELS.embeddings, {
-      text: [page[0].title, page[0].text],
-    });
-    const values = data[0];
-    if (!values) {
-      return c.json({ message: "Embeddings not generated" }, 500);
-    }
-    await db
-      .update(pages)
-      .set({
-        embedding: values,
-      })
-      .where(eq(pages.id, pageId));
-
-    return c.json({ message: "Embeddings generated" });
-  } catch (error) {
-    return c.json({ "An Error Occured": error }, 500);
-  }
-});
+// app.post("/api/pages/generate-embeddings", async (c) => {
+//   const sql = neon(c.env.DATABASE_URL);
+//   const db = drizzle(sql);
+//   const { pageId } = await c.req.json();
+//   if (!pageId) {
+//     return c.json({ message: "Page ID is required" }, 400);
+//   }
+//   try {
+//     const rows = await db
+//       .select({
+//         title: pages.title,
+//         text: pageChunks.content,
+//         chunkId: pageChunks.id,
+//       })
+//       .from(pages)
+//       .where(eq(pages.id, pageId))
+//       .leftJoin(pageChunks, eq(pages.id, page_chunks.pageId));
+//
+//     if (rows.length === 0) {
+//       return c.json({ message: "Page not found" }, 404);
+//     }
+//
+//     for (const row of rows) {
+//       if (row.chunkId === null) {
+//         continue;
+//       }
+//
+//       // @ts-ignore
+//       const { data } = await c.env.AI.run(AI_MODELS.embeddings, {
+//         text: [row.title, row.text],
+//       });
+//       const values = data[0];
+//       if (!values) {
+//         return c.json({ message: "Embeddings not generated" }, 500);
+//       }
+//       await db
+//         .update(pageChunks)
+//         .set({
+//           embedding: values,
+//         })
+//         .where(eq(pageChunks.id, row.chunkId));
+//     }
+//
+//     return c.json({ message: "Embeddings generated" });
+//   } catch (error) {
+//     return c.json({ "An Error Occured": error }, 500);
+//   }
+// });
 
 // NOTE: Can't do this as its not yet implemented by cloudflare themselves
 // {
@@ -306,7 +343,7 @@ app.post("/api/sites/ask/stream", async (c) => {
     const questionEmbedding = embedding.data[0];
 
     const similarity = rawSql<number>`1 - (${cosineDistance(
-      pages.embedding,
+      pageChunks.embedding,
       questionEmbedding
     )})`;
 
@@ -314,36 +351,47 @@ app.post("/api/sites/ask/stream", async (c) => {
       .select({
         title: pages.title,
         url: pages.url,
-        content: pages.cleanedText,
+        content: pageChunks.content,
         similarity,
       })
-      .from(pages)
-      .innerJoin(sites, eq(pages.siteId, sites.id))
-      .where(and(eq(sites.url, site), gt(similarity, 0.3)))
+      .from(pageChunks)
+      .innerJoin(pages, eq(pageChunks.pageId, pages.id))
+      .innerJoin(sites, eq(pages.siteId, siteId))
+      .where(and(eq(sites.id, siteId), gt(similarity, 0.5)))
       .orderBy((t) => desc(t.similarity))
-      .limit(5);
+      .limit(10);
 
     const context =
       relevantContext.length > 0
-        ? `Context:\n${relevantContext
-            .map((docs) => `${docs.url}\n\n${docs.title}\n\n${docs.content}\n`)
-            .join("\n")}`
+        ? SYSTEM_PROMPT.replace(
+            "{context}",
+            relevantContext
+              .map(
+                (docs) => `${docs.url}\n\n${docs.title}\n\n${docs.content}\n`
+              )
+              .join("=".repeat(20) + "\n")
+          )
         : "";
     console.log(context);
 
-    const aiStream = (await c.env.AI.run(AI_MODELS.text_generation, {
+    const workersai = createWorkersAI({ binding: c.env.AI });
+    const result = await generateText({
+      model: workersai(AI_MODELS.text_generation),
       messages: [
-        { role: "system", content: SYSTEM_PROMPT + context },
+        { role: "system", content: context },
         { role: "user", content: question },
       ],
-      stream: true,
-    })) as ReadableStream;
-
-    return new Response(aiStream, {
-      headers: {
-        "Content-Type": "text/event-stream",
-      },
     });
+
+    const references = relevantContext.map((docs) =>
+      docs.url.endsWith("/") ? docs.url : docs.url + "/"
+    );
+    const uniqueReferences = [...new Set(references)];
+
+    return c.json(
+      { response: { answer: result.text, references: uniqueReferences } },
+      200
+    );
   } catch (error) {
     return c.json({ "An Error Occured": error }, 500);
   }
@@ -353,3 +401,48 @@ export { RagWorkflow };
 export default {
   fetch: instrument(app).fetch,
 };
+
+export async function getRelevantContext({
+  db,
+  question,
+  Ai,
+  siteId,
+}: {
+  siteId: number;
+  db: ReturnType<typeof drizzle>;
+  question: string;
+  Ai: Ai;
+}) {
+  const embedding = await Ai.run(AI_MODELS.embeddings, {
+    text: [question],
+  });
+  const questionEmbedding = embedding.data[0];
+
+  const similarity = rawSql<number>`1 - (${cosineDistance(
+    pageChunks.embedding,
+    questionEmbedding
+  )})`;
+
+  const relevantContext = await db
+    .select({
+      title: pages.title,
+      url: pages.url,
+      content: pageChunks.content,
+      similarity,
+    })
+    .from(pageChunks)
+    .innerJoin(pages, eq(pageChunks.pageId, pages.id))
+    .innerJoin(sites, eq(pages.siteId, siteId))
+    .where(and(eq(sites.id, siteId), gt(similarity, 0.5)))
+    .orderBy((t) => desc(t.similarity))
+    .limit(10);
+
+  const context =
+    relevantContext.length > 0
+      ? `Context:\n${relevantContext
+          .map((docs) => `${docs.url}\n\n${docs.title}\n\n${docs.content}\n`)
+          .join("\n")}`
+      : "";
+
+  return context;
+}

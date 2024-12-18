@@ -1,14 +1,15 @@
 {
-  "name": "ai-docs-rag",
+  "name": "ai-rag-crawler",
+  "description": "AI pipeline built with the honc and workers-ai. vector embeddings, web scraping and processing with Cloudflare Workflows (beta)",
   "scripts": {
     "dev": "wrangler dev src/index.ts",
     "deploy": "wrangler deploy --minify src/index.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx seed.ts",
-    "db:setup": "npm run db:generate && npm run db:migrate",
+    "db:setup": "pnpm run db:generate && npm run db:migrate",
     "db:studio": "drizzle-kit studio",
-    "fiberplane": "npx @fiberplane/studio@latest"
+    "fiberplane": "npx @fiberplane/studio@latest",
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.1",
@@ -25,6 +26,5 @@
     "tsx": "^4.19.2",
     "typescript": "^5.5.4",
     "wrangler": "^3.95.0"
-  },
-  "description": "I want to build a talk to documentation api where user will pass a base url to a docs site and the api will first scrape all the links on that site and also the content on that site and then it will go to the links from that site and do the same for all similar sites and then use workers ai to generate the verctor embeddings of the documents and train llms to answer based on the docs"
+  }
 }

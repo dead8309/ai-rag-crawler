@@ -1,4 +1,4 @@
-<h3 align="center">goose-ai-flow</h3>
+<h3 align="center">ai-rag-crawler</h3>
 
 <div align="center">
 
@@ -89,8 +89,8 @@ What things you need to install the software and how to install them.
 Clone the repository:
 
 ```
-git clone https://github.com/dead8309/goose-ai-flow
-cd goose-ai-flow
+git clone https://github.com/dead8309/ai-rag-crawler
+cd ai-rag-crawler
 ```
 
 Install the dependencies:

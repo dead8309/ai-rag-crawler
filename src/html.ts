@@ -9,10 +9,10 @@ export const HTML = `<!DOCTYPE html>
     <body class="bg-white min-h-screen flex items-center justify-center">
         <div class="bg-gray-100 p-8 rounded-lg shadow-md w-full max-w-2xl">
             <h1 class="text-2xl font-bold mb-4">AI URL Chat</h1>
-            <form id="urlForm" class="mb-4">
-                <input type="url" id="urlInput" placeholder="Enter URL" required
+            <form id="idForm" class="mb-4">
+                <input type="number" id="idInput" placeholder="Enter Site Id" required
                        class="w-full p-2 border rounded mb-2">
-                <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded">Submit URL</button>
+                <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded">Submit Id</button>
             </form>
             <div id="chatContainer" class="h-64 overflow-y-auto border p-4 mb-4"></div>
             <form id="chatForm">
@@ -22,12 +22,12 @@ export const HTML = `<!DOCTYPE html>
             </form>
         </div>
         <script>
-            let currentUrl = '';
+            let currentId = '';
 
-            document.getElementById('urlForm').addEventListener('submit', async (e) => {
+            document.getElementById('idForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                currentUrl = document.getElementById('urlInput').value;
-                addMessage('System', 'URL submitted: ' + currentUrl);
+                currentId = document.getElementById('idInput').value;
+                addMessage('System', 'ID submitted: ' + currentId);
             });
 
             document.getElementById('chatForm').addEventListener('submit', async (e) => {
@@ -40,7 +40,7 @@ export const HTML = `<!DOCTYPE html>
                 const response = await fetch('/api/sites/ask/stream', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ site: currentUrl, question: message }),
+                    body: JSON.stringify({ siteId: currentId, question: message }),
                 });
 
 

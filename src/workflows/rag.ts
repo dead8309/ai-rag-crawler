@@ -10,6 +10,7 @@ import { eq } from "drizzle-orm";
 import { ScraperOptions, scrapeSite } from "../scrape";
 import { AI_MODELS } from "../constants";
 import { Bindings } from "../types";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 export type RagWorflowParams = {
   url: string;
@@ -62,7 +63,7 @@ export class RagWorkflow extends WorkflowEntrypoint<
       });
 
       const newPages = await step.do(
-        "Insert scraped pages",
+        "Split page content into chunks and insert into db",
         async () =>
           await Promise.all(
             results.map(async (result) => {
@@ -91,15 +92,33 @@ export class RagWorkflow extends WorkflowEntrypoint<
         await Promise.all(
           newPages.map(async (page) => {
             await step.do(
-              `Generate and Insert embedding for page ${page.pageId}`,
+              `Generate and Insert embedding chunks for page ${page.pageId}`,
               async () => {
+                const chunks = await chunkPageContent(page.text);
+                console.log(chunks);
+
                 const { data } = await this.env.AI.run(AI_MODELS.embeddings, {
-                  text: [page.title, page.text],
+                  text: chunks,
                 });
-                await trx
-                  .update(pages)
-                  .set({ embedding: data[0] })
-                  .where(eq(pages.id, page.pageId));
+
+                console.log(data);
+                if (data.length !== chunks.length) {
+                  console.error(
+                    "Mismatch in number of embeddings generated and number of chunks"
+                  );
+                  return;
+                }
+
+                await Promise.all(
+                  data.map(async (embedding, i) => {
+                    await trx.insert(pageChunks).values({
+                      pageId: page.pageId,
+                      chunkIndex: i,
+                      content: chunks[i],
+                      embedding: embedding,
+                    });
+                  })
+                );
               }
             );
           })
@@ -107,4 +126,12 @@ export class RagWorkflow extends WorkflowEntrypoint<
       });
     });
   }
+}
+
+function chunkPageContent(content: string) {
+  const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 500,
+    chunkOverlap: 128,
+  });
+  return splitter.splitText(content);
 }

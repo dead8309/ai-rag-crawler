@@ -5,7 +5,7 @@ import {
   WorkflowEvent,
   WorkflowStep,
 } from "cloudflare:workers";
-import { pages, sites } from "../db/schema";
+import { pageChunks, pages, sites } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { ScraperOptions, scrapeSite } from "../scrape";
 import { AI_MODELS } from "../constants";
@@ -29,7 +29,7 @@ export class RagWorkflow extends WorkflowEntrypoint<
     await db.transaction(async (trx) => {
       const existingSite = await step.do("Check if site exists", async () => {
         return await trx
-          .select()
+          .select({ id: sites.id })
           .from(sites)
           .where(eq(sites.url, event.payload.url))
           .limit(1);
@@ -72,15 +72,17 @@ export class RagWorkflow extends WorkflowEntrypoint<
                   siteId: siteId,
                   url: result.url,
                   title: result.title,
-                  cleanedText: result.cleanedText,
                 })
                 .returning({
                   pageId: pages.id,
                   title: pages.title,
-                  text: pages.cleanedText,
                 });
 
-              return pageId[0];
+              return {
+                pageId: pageId[0].pageId,
+                title: pageId[0].title,
+                text: result.cleanedText,
+              };
             })
           )
       );
@@ -102,13 +104,6 @@ export class RagWorkflow extends WorkflowEntrypoint<
             );
           })
         );
-      });
-
-      await step.do("Update site total pages", async () => {
-        await trx
-          .update(sites)
-          .set({ totalPages: results.length })
-          .where(eq(sites.id, siteId));
       });
     });
   }

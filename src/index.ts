@@ -2,27 +2,18 @@ import { instrument } from "@fiberplane/hono-otel";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { pageChunks, pages, sites } from "./db/schema";
-import {
-  and,
-  cosineDistance,
-  count,
-  desc,
-  eq,
-  gt,
-  sql as rawSql,
-} from "drizzle-orm";
-import {
-  AI_MODELS,
-  SYSTEM_PROMPT,
-} from "./constants";
+import { count, eq } from "drizzle-orm";
 
 import { cors } from "hono/cors";
 
 import { RagWorkflow } from "./workflows/rag";
 import { HTML } from "./html";
 import { Bindings } from "./types";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { z } from "zod";
+import { ErrorResponseSchema } from "./schema";
 
-const app = new Hono<{ Bindings: Bindings }>();
+const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
 app.get("/", (c) => {
   // return c.text("Honc! 🪿");
@@ -30,12 +21,12 @@ app.get("/", (c) => {
 });
 
 app.use(
-    "/api/*",
-    cors({
-        origin: ["http://localhost:3001"],
-        maxAge: 600,
-        credentials: true,
-    })
+  "/api/*",
+  cors({
+    origin: ["http://localhost:3001"],
+    maxAge: 600,
+    credentials: true,
+  })
 );
 
 app.get("/api/sites", async (c) => {
@@ -56,12 +47,48 @@ app.get("/api/sites", async (c) => {
   return c.json(rows);
 });
 
-app.delete("/api/sites", async (c) => {
+const deleteSitesRoute = createRoute({
+  method: "delete",
+  path: "/api/sites/{id}",
+  description: "Deletes a site",
+  request: {
+    params: z.object({
+      id: z.number().openapi({ example: 1 }),
+    }),
+  },
+  responses: {
+    200: {
+      description: "Returns a success response",
+      content: {
+        "application/json": {
+          schema: z.object({ message: z.string() }).openapi("SuccessResponse"),
+        },
+      },
+    },
+    400: {
+      description: "Returns an error response",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+    500: {
+      description: "Returns an error response",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+  },
+});
+
+app.openapi(deleteSitesRoute, async (c) => {
   try {
     const sql = neon(c.env.DATABASE_URL);
     const db = drizzle(sql);
-    const body = await c.req.json();
-    const siteId = Number.parseInt(body.siteId);
+    const { id: siteId } = c.req.valid("param");
     await db.delete(sites).where(eq(sites.id, siteId));
     return c.json({ message: "Site deleted" });
   } catch (error) {

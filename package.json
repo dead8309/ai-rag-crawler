@@ -9,14 +9,20 @@
     "db:seed": "tsx seed.ts",
     "db:setup": "pnpm run db:generate && npm run db:migrate",
     "db:studio": "drizzle-kit studio",
-    "fiberplane": "npx @fiberplane/studio@latest",
+    "fiberplane": "npx @fiberplane/studio@latest"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^1.0.11",
+    "@hono/zod-openapi": "^0.18.3",
     "@neondatabase/serverless": "^0.10.1",
+    "ai": "^4.0.22",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.36.4",
     "hono": "^4.6.7",
-    "p-limit": "^6.1.0"
+    "langchain": "^0.3.8",
+    "p-limit": "^6.1.0",
+    "workers-ai-provider": "^0.0.10",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241205.0",

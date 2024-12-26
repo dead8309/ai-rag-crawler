@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/neon-http";
 import { pageChunks, pages, sites } from "./db/schema";
 import { count, eq } from "drizzle-orm";
 
+import { workflowRouter } from "./routes/workflow";
 import { cors } from "hono/cors";
 
 import { RagWorkflow } from "./workflows/rag";
@@ -178,57 +179,7 @@ app.delete("/api/pages/:pageId", async (c) => {
     return c.json({ message: "An error occured" }, 500);
   }
 });
-
-app.post("/api/scrape/workflow", async (c) => {
-  const sql = neon(c.env.DATABASE_URL);
-  const db = drizzle(sql);
-  const { url, strict = "false", type = "browser" } = await c.req.json();
-  if (!url) {
-    return c.json({ message: "URL is required" }, 400);
-  }
-  try {
-    const existingSite = await db
-      .select({ id: sites.id })
-      .from(sites)
-      .where(eq(sites.url, url))
-      .limit(1);
-
-    if (existingSite.length > 0) {
-      return c.json({ message: "Site with this URL already exists" }, 401);
-    }
-
-    let instance = await c.env.RAG_WORKFLOW.create({
-      params: {
-        url: url,
-        strict: strict,
-        type: type,
-      },
-    });
-
-    return c.json({
-      message: "Rag Workflow started",
-      instanceId: instance.id,
-      details: await instance.status(),
-    });
-  } catch (error) {
-    return c.json({ "An Error Occured": error }, 500);
-  }
-});
-
-app.get("/api/scrape/workflow/:id", async (c) => {
-  const id = c.req.param("id");
-  try {
-    let instance = await c.env.RAG_WORKFLOW.get(id);
-    return c.json({
-      id: instance.id,
-      ...(await instance.status()),
-    });
-  } catch (e: any) {
-    const msg = `failed to get instance ${id}: ${e.message}`;
-    console.error(msg);
-    return c.json({ error: msg }, { status: 400 });
-  }
-});
+app.route("/api/scrape", workflowRouter);
 
 // app.post("/api/pages/generate-embeddings", async (c) => {
 //   const sql = neon(c.env.DATABASE_URL);

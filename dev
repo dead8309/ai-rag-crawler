@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ -z "$TMUX" ]; then
+    folder=$(basename "$PWD")
+    tmux attach -t "$folder" || tmux new-session -s "$folder"
+fi
+
+tmux new-window -n "dev" pnpm dev
+tmux new-window -n "fiberplane" pnpm fiberplane
+tmux new-window -n "drizzle" pnpm db:studio
+# misc
+tmux new-window

@@ -14,9 +14,30 @@ import { HTML } from "./html";
 import { Bindings } from "./types";
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { z } from "zod";
-import { ErrorResponseSchema, PageSchema, SiteSchema } from "./schema";
+import {
+  ErrorResponseSchema,
+  PageSchema,
+  SingleSiteSchema,
+  SiteSchema,
+} from "./schema";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
+
+const getAllSitesRoute = createRoute({
+  method: "get",
+  path: "/api/sites",
+  description: "Gets all sites",
+  responses: {
+    200: {
+      description: "Returns a success response",
+      content: {
+        "application/json": {
+          schema: z.array(SiteSchema),
+        },
+      },
+    },
+  },
+});
 
 const getSiteRoute = createRoute({
   method: "get",
@@ -32,7 +53,7 @@ const getSiteRoute = createRoute({
       description: "Returns a success response",
       content: {
         "application/json": {
-          schema: SiteSchema,
+          schema: SingleSiteSchema,
         },
       },
     },
@@ -163,7 +184,7 @@ app.use(
   })
 );
 
-app.get("/api/sites", async (c) => {
+app.openapi(getAllSitesRoute, async (c) => {
   const sql = neon(c.env.DATABASE_URL);
   const db = drizzle(sql);
   const rows = await db
@@ -178,7 +199,7 @@ app.get("/api/sites", async (c) => {
     .leftJoin(pages, eq(sites.id, pages.siteId))
     .groupBy(sites.id, sites.url, sites.createdAt, sites.updatedAt);
 
-  return c.json(rows);
+  return c.json(rows, 200);
 });
 
 app.openapi(getSiteRoute, async (c) => {

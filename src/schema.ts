@@ -20,7 +20,7 @@ export const AskMessagesSchema = z
   })
   .openapi("Messages");
 
-export const SiteSchema = z
+export const SingleSiteSchema = z
   .object({
     siteId: z.number(),
     siteUrl: z.string(),
@@ -55,4 +55,12 @@ export const PageSchema = z.object({
     })
     .optional()
     .openapi("PageChunk"),
+});
+
+export const SiteSchema = z.object({
+  id: z.number(),
+  url: z.string(),
+  totalPages: z.number(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
 });

@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   pgTable,
   serial,
@@ -33,16 +34,18 @@ export const pages = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
-  (table) => [
-    {
-      siteIdUrlUnique: uniqueIndex("unique_page_url_per_site").on(
-        table.siteId,
-        table.url
-      ),
-      siteIdIdx: index("site_id_idx").on(table.siteId),
-    },
-  ]
+  (table) => ({
+    siteIdUrlUnique: uniqueIndex("unique_page_url_per_site").on(
+      table.siteId,
+      table.url
+    ),
+    siteIdIdx: index("site_id_idx").on(table.siteId),
+  })
 );
+
+export const pagesRelations = relations(pages, ({ many }) => ({
+  pageChunks: many(pageChunks),
+}));
 
 export const pageChunks = pgTable(
   "page_chunks",
@@ -57,12 +60,17 @@ export const pageChunks = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
-  (table) => [
-    {
-      embeddingIdx: index("embedding_idx").using(
-        "hnsw",
-        table.embedding.op("vector_cosine_ops")
-      ),
-    },
-  ]
+  (table) => ({
+    embeddingIdx: index("embedding_idx").using(
+      "hnsw",
+      table.embedding.op("vector_cosine_ops")
+    ),
+  })
 );
+
+export const pageChunksRelations = relations(pageChunks, ({ one }) => ({
+  page: one(pages, {
+    fields: [pageChunks.pageId],
+    references: [pages.id],
+  }),
+}));

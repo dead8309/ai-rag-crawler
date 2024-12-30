@@ -167,6 +167,15 @@ const deletePagesRoute = createRoute({
   },
 });
 
+const middlewareApp = new OpenAPIHono<{ Bindings: Bindings }>().use(
+  "/api/*",
+  cors({
+    origin: "*",
+    maxAge: 600,
+    credentials: true,
+  })
+);
+
 const app = new OpenAPIHono<{ Bindings: Bindings }>()
   .route("/api/scrape", workflowRouter)
   .route("/api/sites/ask", askRouter)
@@ -286,21 +295,13 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
       return c.json({ message: "An error occured" }, 500);
     }
   })
-
   .get("/", (c) => {
     return c.redirect("https://github.com/dead8309/ai-rag-crawler");
-  })
-
-  .use(
-    "/api/*",
-    cors({
-      origin: "*",
-      maxAge: 600,
-      credentials: true,
-    })
-  );
+  });
 
 export type AppType = typeof app;
 
+middlewareApp.route("", app);
+
 export { RagWorkflow };
-export default instrument(app);
+export default instrument(middlewareApp);

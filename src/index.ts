@@ -1,7 +1,8 @@
 import { instrument } from "@fiberplane/hono-otel";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { pageChunks, pages, sites } from "./db/schema";
+import { pages, sites } from "./db/schema";
+import * as schema from "./db/schema";
 import { count, eq } from "drizzle-orm";
 
 import { askRouter } from "./routes/ask";
@@ -13,9 +14,140 @@ import { HTML } from "./html";
 import { Bindings } from "./types";
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { z } from "zod";
-import { ErrorResponseSchema } from "./schema";
+import { ErrorResponseSchema, PageSchema, SiteSchema } from "./schema";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
+
+const getSiteRoute = createRoute({
+  method: "get",
+  path: "/api/sites/{id}",
+  description: "Gets a site",
+  request: {
+    params: z.object({
+      id: z.coerce.number().openapi({ example: 1 }),
+    }),
+  },
+  responses: {
+    200: {
+      description: "Returns a success response",
+      content: {
+        "application/json": {
+          schema: SiteSchema,
+        },
+      },
+    },
+    500: {
+      description: "Returns an error response",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+  },
+});
+
+const deleteSitesRoute = createRoute({
+  method: "delete",
+  path: "/api/sites/{id}",
+  description: "Deletes a site",
+  request: {
+    params: z.object({
+      id: z.coerce.number().openapi({ example: 1 }),
+    }),
+  },
+  responses: {
+    200: {
+      description: "Returns a success response",
+      content: {
+        "application/json": {
+          schema: z.object({ message: z.string() }).openapi("SuccessResponse"),
+        },
+      },
+    },
+    400: {
+      description: "Returns an error response",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+    500: {
+      description: "Returns an error response",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+  },
+});
+
+const getPagesRoute = createRoute({
+  method: "get",
+  path: "/api/pages/{pageId}",
+  request: {
+    params: z.object({
+      pageId: z.coerce.number().openapi({ example: 1 }),
+    }),
+  },
+  responses: {
+    200: {
+      description: "Returns a success response",
+      content: {
+        "application/json": {
+          schema: PageSchema,
+        },
+      },
+    },
+    404: {
+      description: "Returns an error response",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+    500: {
+      description: "Returns an error response",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+  },
+});
+
+const deletePagesRoute = createRoute({
+  method: "delete",
+  path: "/api/pages/{pageId}",
+  description: "Deletes a page",
+  request: {
+    params: z.object({
+      pageId: z.coerce.number().openapi({ example: 1 }),
+    }),
+  },
+  responses: {
+    200: {
+      description: "Returns a success response",
+      content: {
+        "application/json": {
+          schema: z.object({ message: z.string() }).openapi("SuccessResponse"),
+        },
+      },
+    },
+    500: {
+      description: "Returns an error response",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+  },
+});
 
 app.get("/", (c) => {
   // return c.text("Honc! 🪿");
@@ -49,64 +181,11 @@ app.get("/api/sites", async (c) => {
   return c.json(rows);
 });
 
-const deleteSitesRoute = createRoute({
-  method: "delete",
-  path: "/api/sites/{id}",
-  description: "Deletes a site",
-  request: {
-    params: z.object({
-      id: z.number().openapi({ example: 1 }),
-    }),
-  },
-  responses: {
-    200: {
-      description: "Returns a success response",
-      content: {
-        "application/json": {
-          schema: z.object({ message: z.string() }).openapi("SuccessResponse"),
-        },
-      },
-    },
-    400: {
-      description: "Returns an error response",
-      content: {
-        "application/json": {
-          schema: ErrorResponseSchema,
-        },
-      },
-    },
-    500: {
-      description: "Returns an error response",
-      content: {
-        "application/json": {
-          schema: ErrorResponseSchema,
-        },
-      },
-    },
-  },
-});
-
-app.openapi(deleteSitesRoute, async (c) => {
-  try {
-    const sql = neon(c.env.DATABASE_URL);
-    const db = drizzle(sql);
-    const { id: siteId } = c.req.valid("param");
-    await db.delete(sites).where(eq(sites.id, siteId));
-    return c.json({ message: "Site deleted" });
-  } catch (error) {
-    console.log("Error deleting site", error);
-    return c.json({ message: "An error occured" }, 500);
-  }
-});
-
-app.get("/api/sites/:siteId", async (c) => {
+app.openapi(getSiteRoute, async (c) => {
   const sql = neon(c.env.DATABASE_URL);
   const db = drizzle(sql);
-  const siteId = Number.parseInt(c.req.param("siteId"));
+  const { id: siteId } = c.req.valid("param");
 
-  if (isNaN(siteId)) {
-    return c.json({ message: "Invalid siteId" }, 400);
-  }
   try {
     const [sitePages] = await db
       .select({
@@ -128,111 +207,83 @@ app.get("/api/sites/:siteId", async (c) => {
       .from(pages)
       .where(eq(pages.siteId, siteId));
 
-    return c.json({
-      ...sitePages,
-      pages: pageRows,
-    });
+    return c.json(
+      {
+        ...sitePages,
+        pages: pageRows,
+      },
+      200
+    );
   } catch (error) {
     console.error("Error fetching pages", error);
     return c.json({ message: "An error occured" }, 500);
   }
 });
 
-app.get("/api/pages/:pageId", async (c) => {
-  const sql = neon(c.env.DATABASE_URL);
-  const db = drizzle(sql);
-  const pageId = Number.parseInt(c.req.param("pageId"));
-
-  if (isNaN(pageId)) {
-    return c.json({ message: "Invalid pageId" }, 400);
-  }
+app.openapi(deleteSitesRoute, async (c) => {
   try {
-    const pageRow = await db
-      .select()
-      .from(pages)
-      .where(eq(pages.id, pageId))
-      .leftJoin(pageChunks, eq(pages.id, pageChunks.pageId));
+    const sql = neon(c.env.DATABASE_URL);
+    const db = drizzle(sql);
+    const { id: siteId } = c.req.valid("param");
+    await db.delete(sites).where(eq(sites.id, siteId));
+    return c.json({ message: "Site deleted" });
+  } catch (error) {
+    console.log("Error deleting site", error);
+    return c.json({ message: "An error occured" }, 500);
+  }
+});
 
-    if (pageRow.length === 0) {
+app.openapi(getPagesRoute, async (c) => {
+  const sql = neon(c.env.DATABASE_URL);
+  const db = drizzle(sql, { schema: schema });
+  const { pageId } = c.req.valid("param");
+
+  try {
+    const pageRow = await db.query.pages.findFirst({
+      with: {
+        pageChunks: {
+          columns: {
+            id: true,
+            pageId: true,
+            content: true,
+            chunkIndex: true,
+            embedding: true,
+          },
+        },
+      },
+      where: eq(pages.id, pageId),
+      columns: {
+        createdAt: false,
+        updatedAt: false,
+      },
+    });
+
+    if (!pageRow) {
       return c.json({ message: "No page found" }, 404);
     }
-
-    return c.json(pageRow[0]);
+    return c.json(pageRow, 200);
   } catch (error) {
     console.error("Error fetching pages", error);
     return c.json({ message: "An error occured" }, 500);
   }
 });
 
-app.delete("/api/pages/:pageId", async (c) => {
+app.openapi(deletePagesRoute, async (c) => {
   const sql = neon(c.env.DATABASE_URL);
   const db = drizzle(sql);
-  const pageId = Number.parseInt(c.req.param("pageId"));
+  const { pageId } = c.req.valid("param");
 
-  if (isNaN(pageId)) {
-    return c.json({ message: "Invalid pageId" }, 400);
-  }
   try {
     await db.delete(pages).where(eq(pages.id, pageId));
-    return c.json({ message: "Page deleted" });
+    return c.json({ message: "Page deleted" }, 200);
   } catch (error) {
     console.error("Error Deleting page", error);
     return c.json({ message: "An error occured" }, 500);
   }
 });
+
 app.route("/api/scrape", workflowRouter);
-
-// app.post("/api/pages/generate-embeddings", async (c) => {
-//   const sql = neon(c.env.DATABASE_URL);
-//   const db = drizzle(sql);
-//   const { pageId } = await c.req.json();
-//   if (!pageId) {
-//     return c.json({ message: "Page ID is required" }, 400);
-//   }
-//   try {
-//     const rows = await db
-//       .select({
-//         title: pages.title,
-//         text: pageChunks.content,
-//         chunkId: pageChunks.id,
-//       })
-//       .from(pages)
-//       .where(eq(pages.id, pageId))
-//       .leftJoin(pageChunks, eq(pages.id, page_chunks.pageId));
-//
-//     if (rows.length === 0) {
-//       return c.json({ message: "Page not found" }, 404);
-//     }
-//
-//     for (const row of rows) {
-//       if (row.chunkId === null) {
-//         continue;
-//       }
-//
-//       // @ts-ignore
-//       const { data } = await c.env.AI.run(AI_MODELS.embeddings, {
-//         text: [row.title, row.text],
-//       });
-//       const values = data[0];
-//       if (!values) {
-//         return c.json({ message: "Embeddings not generated" }, 500);
-//       }
-//       await db
-//         .update(pageChunks)
-//         .set({
-//           embedding: values,
-//         })
-//         .where(eq(pageChunks.id, row.chunkId));
-//     }
-//
-//     return c.json({ message: "Embeddings generated" });
-//   } catch (error) {
-//     return c.json({ "An Error Occured": error }, 500);
-//   }
-// });
-
 app.route("/api/sites/ask", askRouter);
-
 
 export { RagWorkflow };
 export default {

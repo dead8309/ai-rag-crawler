@@ -10,7 +10,6 @@ import { workflowRouter } from "./routes/workflow";
 import { cors } from "hono/cors";
 
 import { RagWorkflow } from "./workflows/rag";
-import { HTML } from "./html";
 import { Bindings } from "./types";
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { z } from "zod";
@@ -20,8 +19,6 @@ import {
   SingleSiteSchema,
   SiteSchema,
 } from "./schema";
-
-const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
 const getAllSitesRoute = createRoute({
   method: "get",
@@ -170,143 +167,140 @@ const deletePagesRoute = createRoute({
   },
 });
 
-app.get("/", (c) => {
-  // return c.text("Honc! 🪿");
-  return c.html(HTML);
-});
-
-app.use(
-  "/api/*",
-  cors({
-    origin: "*",
-    maxAge: 600,
-    credentials: true,
-  })
-);
-
-app.openapi(getAllSitesRoute, async (c) => {
-  const sql = neon(c.env.DATABASE_URL);
-  const db = drizzle(sql);
-  const rows = await db
-    .select({
-      id: sites.id,
-      url: sites.url,
-      totalPages: count(pages.id),
-      createdAt: sites.createdAt,
-      updatedAt: sites.updatedAt,
-    })
-    .from(sites)
-    .leftJoin(pages, eq(sites.id, pages.siteId))
-    .groupBy(sites.id, sites.url, sites.createdAt, sites.updatedAt);
-
-  return c.json(rows, 200);
-});
-
-app.openapi(getSiteRoute, async (c) => {
-  const sql = neon(c.env.DATABASE_URL);
-  const db = drizzle(sql);
-  const { id: siteId } = c.req.valid("param");
-
-  try {
-    const [sitePages] = await db
+const app = new OpenAPIHono<{ Bindings: Bindings }>()
+  .route("/api/scrape", workflowRouter)
+  .route("/api/sites/ask", askRouter)
+  .openapi(getAllSitesRoute, async (c) => {
+    const sql = neon(c.env.DATABASE_URL);
+    const db = drizzle(sql);
+    const rows = await db
       .select({
-        siteId: sites.id,
-        siteUrl: sites.url,
+        id: sites.id,
+        url: sites.url,
         totalPages: count(pages.id),
+        createdAt: sites.createdAt,
+        updatedAt: sites.updatedAt,
       })
       .from(sites)
-      .where(eq(sites.id, siteId))
       .leftJoin(pages, eq(sites.id, pages.siteId))
-      .groupBy(sites.id);
+      .groupBy(sites.id, sites.url, sites.createdAt, sites.updatedAt);
 
-    const pageRows = await db
-      .select({
-        id: pages.id,
-        title: pages.title,
-        url: pages.url,
-      })
-      .from(pages)
-      .where(eq(pages.siteId, siteId));
+    return c.json(rows, 200);
+  })
 
-    return c.json(
-      {
-        ...sitePages,
-        pages: pageRows,
-      },
-      200
-    );
-  } catch (error) {
-    console.error("Error fetching pages", error);
-    return c.json({ message: "An error occured" }, 500);
-  }
-});
-
-app.openapi(deleteSitesRoute, async (c) => {
-  try {
+  .openapi(getSiteRoute, async (c) => {
     const sql = neon(c.env.DATABASE_URL);
     const db = drizzle(sql);
     const { id: siteId } = c.req.valid("param");
-    await db.delete(sites).where(eq(sites.id, siteId));
-    return c.json({ message: "Site deleted" });
-  } catch (error) {
-    console.log("Error deleting site", error);
-    return c.json({ message: "An error occured" }, 500);
-  }
-});
 
-app.openapi(getPagesRoute, async (c) => {
-  const sql = neon(c.env.DATABASE_URL);
-  const db = drizzle(sql, { schema: schema });
-  const { pageId } = c.req.valid("param");
+    try {
+      const [sitePages] = await db
+        .select({
+          siteId: sites.id,
+          siteUrl: sites.url,
+          totalPages: count(pages.id),
+        })
+        .from(sites)
+        .where(eq(sites.id, siteId))
+        .leftJoin(pages, eq(sites.id, pages.siteId))
+        .groupBy(sites.id);
 
-  try {
-    const pageRow = await db.query.pages.findFirst({
-      with: {
-        pageChunks: {
-          columns: {
-            id: true,
-            pageId: true,
-            content: true,
-            chunkIndex: true,
-            embedding: true,
+      const pageRows = await db
+        .select({
+          id: pages.id,
+          title: pages.title,
+          url: pages.url,
+        })
+        .from(pages)
+        .where(eq(pages.siteId, siteId));
+
+      return c.json(
+        {
+          ...sitePages,
+          pages: pageRows,
+        },
+        200
+      );
+    } catch (error) {
+      console.error("Error fetching pages", error);
+      return c.json({ message: "An error occured" }, 500);
+    }
+  })
+  .openapi(deleteSitesRoute, async (c) => {
+    try {
+      const sql = neon(c.env.DATABASE_URL);
+      const db = drizzle(sql);
+      const { id: siteId } = c.req.valid("param");
+      await db.delete(sites).where(eq(sites.id, siteId));
+      return c.json({ message: "Site deleted" });
+    } catch (error) {
+      console.log("Error deleting site", error);
+      return c.json({ message: "An error occured" }, 500);
+    }
+  })
+  .openapi(getPagesRoute, async (c) => {
+    const sql = neon(c.env.DATABASE_URL);
+    const db = drizzle(sql, { schema: schema });
+    const { pageId } = c.req.valid("param");
+
+    try {
+      const pageRow = await db.query.pages.findFirst({
+        with: {
+          pageChunks: {
+            columns: {
+              id: true,
+              pageId: true,
+              content: true,
+              chunkIndex: true,
+              embedding: true,
+            },
           },
         },
-      },
-      where: eq(pages.id, pageId),
-      columns: {
-        createdAt: false,
-        updatedAt: false,
-      },
-    });
+        where: eq(pages.id, pageId),
+        columns: {
+          createdAt: false,
+          updatedAt: false,
+        },
+      });
 
-    if (!pageRow) {
-      return c.json({ message: "No page found" }, 404);
+      if (!pageRow) {
+        return c.json({ message: "No page found" }, 404);
+      }
+      return c.json(pageRow, 200);
+    } catch (error) {
+      console.error("Error fetching pages", error);
+      return c.json({ message: "An error occured" }, 500);
     }
-    return c.json(pageRow, 200);
-  } catch (error) {
-    console.error("Error fetching pages", error);
-    return c.json({ message: "An error occured" }, 500);
-  }
-});
+  })
 
-app.openapi(deletePagesRoute, async (c) => {
-  const sql = neon(c.env.DATABASE_URL);
-  const db = drizzle(sql);
-  const { pageId } = c.req.valid("param");
+  .openapi(deletePagesRoute, async (c) => {
+    const sql = neon(c.env.DATABASE_URL);
+    const db = drizzle(sql);
+    const { pageId } = c.req.valid("param");
 
-  try {
-    await db.delete(pages).where(eq(pages.id, pageId));
-    return c.json({ message: "Page deleted" }, 200);
-  } catch (error) {
-    console.error("Error Deleting page", error);
-    return c.json({ message: "An error occured" }, 500);
-  }
-});
+    try {
+      await db.delete(pages).where(eq(pages.id, pageId));
+      return c.json({ message: "Page deleted" }, 200);
+    } catch (error) {
+      console.error("Error Deleting page", error);
+      return c.json({ message: "An error occured" }, 500);
+    }
+  })
 
-app.route("/api/scrape", workflowRouter);
-app.route("/api/sites/ask", askRouter);
+  .get("/", (c) => {
+    return c.redirect("https://github.com/dead8309/ai-rag-crawler");
+  })
+
+  .use(
+    "/api/*",
+    cors({
+      origin: "*",
+      maxAge: 600,
+      credentials: true,
+    })
+  );
+
+export type AppType = typeof app;
 
 export { RagWorkflow };
-export default {
-  fetch: instrument(app).fetch,
-};
+export default instrument(app);

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ -z "$TMUX" ]; then
+    folder=$(basename "$PWD")
+    tmux attach -t "$folder" || tmux new-session -s "$folder"
+fi
+
+tmux neww -n "dev" "turbo dev"
+
+tmux neww -n "backend"
+tmux send-keys -t "backend" "pnpm --filter=api fiberplane" C-m
+tmux splitw -h "pnpm --filter=api db:studio"
+
+# go back
+tmux select-window -t 1

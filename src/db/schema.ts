@@ -34,13 +34,10 @@ export const pages = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
-  (table) => ({
-    siteIdUrlUnique: uniqueIndex("unique_page_url_per_site").on(
-      table.siteId,
-      table.url
-    ),
-    siteIdIdx: index("site_id_idx").on(table.siteId),
-  })
+  (table) => [
+    uniqueIndex("unique_page_url_per_site").on(table.siteId, table.url),
+    index("site_id_idx").on(table.siteId),
+  ]
 );
 
 export const pagesRelations = relations(pages, ({ many }) => ({
@@ -60,12 +57,12 @@ export const pageChunks = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
-  (table) => ({
-    embeddingIdx: index("embedding_idx").using(
+  (table) => [
+    index("embedding_idx").using(
       "hnsw",
       table.embedding.op("vector_cosine_ops")
     ),
-  })
+  ]
 );
 
 export const pageChunksRelations = relations(pageChunks, ({ one }) => ({

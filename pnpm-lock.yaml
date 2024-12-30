@@ -85,8 +85,8 @@ importers:
   apps/scraper:
     dependencies:
       '@sparticuz/chromium-min':
-        specifier: ^122.0.0
-        version: 122.0.0
+        specifier: ^131.0.1
+        version: 131.0.1
       cheerio:
         specifier: ^1.0.0-rc.12
         version: 1.0.0
@@ -2052,8 +2052,8 @@ packages:
   '@shikijs/vscode-textmate@9.3.1':
     resolution: {integrity: sha512-79QfK1393x9Ho60QFyLti+QfdJzRQCVLFb97kOIV7Eo9vQU/roINgk7m24uv0a7AUvN//RDH36FLjjK48v0s9g==}
 
-  '@sparticuz/chromium-min@122.0.0':
-    resolution: {integrity: sha512-0EcOK6JqCA4iAutAQbAQPkJXLMXxkJ/jVJgQc7xz3rPgecLOpu8zji286qYthe/ux7YxtVAVlRHJeg1n2EVWiw==}
+  '@sparticuz/chromium-min@131.0.1':
+    resolution: {integrity: sha512-kQqKflJtjcBb8aA1b6L4dhU/8UbCJHcjb3au8cjBhKAG7nzqh//92rHCB6ULkgV0CMEQmfp3LDBQ/W8Wg2k+Yg==}
     engines: {node: '>= 16'}
 
   '@swc/counter@0.1.3':
@@ -7100,7 +7100,7 @@ snapshots:
 
   '@shikijs/vscode-textmate@9.3.1': {}
 
-  '@sparticuz/chromium-min@122.0.0':
+  '@sparticuz/chromium-min@131.0.1':
     dependencies:
       follow-redirects: 1.15.9
       tar-fs: 3.0.6

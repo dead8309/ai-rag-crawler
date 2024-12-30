@@ -14,7 +14,7 @@
 </p>
 
 > [!NOTE]
-> 
+>
 > See [How to use the frontend in live url](#how-to-use-the-frontend-in-live-url)
 
 ## 📝 Table of Contents

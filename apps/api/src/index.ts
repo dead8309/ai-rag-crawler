@@ -18,7 +18,7 @@ import {
   PageSchema,
   SingleSiteSchema,
   SiteSchema,
-} from "./schema";
+} from "@repo/shared";
 
 const getAllSitesRoute = createRoute({
   method: "get",

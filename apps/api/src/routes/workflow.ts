@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 import { z } from "zod";
 import { sites } from "../db/schema";
-import { ErrorResponseSchema } from "../schema";
+import { ErrorResponseSchema } from "@repo/shared";
 import { Bindings } from "../types";
 
 const scrapeWorkflowRoute = createRoute({

@@ -13,7 +13,7 @@ import {
   SYSTEM_PROMPT_WITHOUT_CONTEXT,
 } from "../constants";
 import { pageChunks, pages, sites } from "../db/schema";
-import { ErrorResponseSchema, AskMessagesSchema } from "../schema";
+import { ErrorResponseSchema, AskMessagesSchema } from "@repo/shared";
 import { Bindings } from "../types";
 
 const streamAskRoute = createRoute({

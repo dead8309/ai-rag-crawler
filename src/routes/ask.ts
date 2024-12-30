@@ -129,62 +129,6 @@ const askQuestionRoute = createRoute({
 });
 
 const router = new OpenAPIHono<{ Bindings: Bindings }>()
-  .openapi(streamAskRoute, async (c) => {
-    const sql = neon<boolean, boolean>(c.env.DATABASE_URL);
-    const db = drizzle(sql);
-    const { messages, siteId } = c.req.valid("json");
-    // const messages: Array<CoreMessage> = convertToCoreMessages(body.messages);
-
-    try {
-      // const aiStream = (await c.env.AI.run(AI_MODELS.text_generation, {
-      //   messages: [
-      //     { role: "system", content: SYSTEM_PROMPT + context },
-      //     { role: "user", content: question },
-      //   ],
-      //   stream: true,
-      // })) as ReadableStream;
-
-      // return new Response(aiStream, {
-      //   headers: {
-      //     "Content-Type": "text/event-stream",
-      //   },
-      // });
-
-      const openai = createOpenAI({ apiKey: c.env.OPENAI_API_KEY });
-      const result = streamText({
-        model: openai("gpt-4o-mini"),
-        system: SYSTEM_PROMPT_WITHOUT_CONTEXT,
-        messages,
-        tools: {
-          getInformation: tool({
-            description: "Get information from your knowledge base to answer",
-            parameters: z.object({
-              question: z.string().describe("User's question"),
-            }),
-            execute: async ({ question }) => {
-              const ctx = await getRelevantContext({
-                db,
-                question,
-                Ai: c.env.AI,
-                siteId,
-              });
-
-              return ctx;
-            },
-          }),
-        },
-        maxSteps: 5,
-      });
-
-      c.header("X-Vercel-AI-Data-Stream", "v1");
-      c.header("Content-Type", "text/plain; charset=utf-8");
-
-      return stream(c, (stream) => stream.pipe(result.toDataStream()));
-    } catch (error) {
-      console.log("Error", error);
-      return c.json({ "An Error Occured": error }, 500);
-    }
-  })
   .openapi(askQuestionRoute, async (c) => {
     const sql = neon<boolean, boolean>(c.env.DATABASE_URL);
     const db = drizzle(sql);
@@ -261,6 +205,65 @@ const router = new OpenAPIHono<{ Bindings: Bindings }>()
     } catch (error) {
       return c.json({ "An Error Occured": error }, 500);
     }
+  })
+  .openapi(streamAskRoute, async (c) => {
+    const sql = neon<boolean, boolean>(c.env.DATABASE_URL);
+    const db = drizzle(sql);
+    const { messages, siteId } = c.req.valid("json");
+
+    try {
+      // const aiStream = (await c.env.AI.run(AI_MODELS.text_generation, {
+      //   messages: [
+      //     { role: "system", content: SYSTEM_PROMPT + context },
+      //     { role: "user", content: question },
+      //   ],
+      //   stream: true,
+      // })) as ReadableStream;
+
+      // return new Response(aiStream, {
+      //   headers: {
+      //     "Content-Type": "text/event-stream",
+      //   },
+      // });
+
+      const openai = createOpenAI({
+        apiKey: c.env.OPENAI_API_KEY,
+        baseURL: "https://api.deepseek.com/v1",
+      });
+      const result = streamText({
+        model: openai("deepseek-chat"),
+        system: SYSTEM_PROMPT_WITHOUT_CONTEXT,
+        messages,
+        tools: {
+          getInformation: tool({
+            description: "Get information from your knowledge base to answer",
+            parameters: z.object({
+              question: z.string().describe("User's question"),
+            }),
+            execute: async ({ question }) => {
+              const ctx = await getRelevantContext({
+                db,
+                question,
+                Ai: c.env.AI,
+                siteId,
+              });
+              console.log(ctx);
+
+              return ctx;
+            },
+          }),
+        },
+        maxSteps: 5,
+      });
+
+      c.header("X-Vercel-AI-Data-Stream", "v1");
+      c.header("Content-Type", "text/plain; charset=utf-8");
+
+      return stream(c, (stream) => stream.pipe(result.toDataStream()));
+    } catch (error) {
+      console.log("Error", error);
+      return c.json({ "An Error Occured": error }, 500);
+    }
   });
 
 export { router as askRouter };
@@ -300,12 +303,12 @@ export async function getRelevantContext({
     .orderBy((t) => desc(t.similarity))
     .limit(10);
 
-  const context =
-    relevantContext.length > 0
-      ? `Context:\n${relevantContext
-          .map((docs) => `${docs.url}\n\n${docs.title}\n\n${docs.content}\n`)
-          .join("\n")}`
-      : "";
+  // const context =
+  //  relevantContext.length > 0
+  //    ? `Context:\n${relevantContext
+  //        .map((docs) => `${docs.url}\n\n${docs.title}\n\n${docs.content}\n`)
+  //        .join("\n")}`
+  //    : "";
 
-  return context;
+  return relevantContext;
 }

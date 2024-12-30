@@ -25,7 +25,7 @@ app.get("/", (c) => {
 app.use(
   "/api/*",
   cors({
-    origin: ["http://localhost:3001"],
+    origin: "*",
     maxAge: 600,
     credentials: true,
   })

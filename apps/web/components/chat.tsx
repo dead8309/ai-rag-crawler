@@ -7,6 +7,7 @@ import { ThinkingMessage } from "@/components/messages/thinking";
 import { PreviewMessage } from "./messages/preview";
 
 import { useScrollToBottom } from "./use-scroll-to-bottom";
+import { client } from "@/lib/client";
 
 export function AiChat({ siteId }: { siteId: number }) {
   const {
@@ -18,7 +19,7 @@ export function AiChat({ siteId }: { siteId: number }) {
     setMessages,
     reload,
   } = useChat({
-    api: "http://localhost:8787/api/sites/ask/stream",
+    api: client.api.sites.ask.stream.$url().toString(),
     body: { siteId: Number(siteId) },
   });
 

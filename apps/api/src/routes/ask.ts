@@ -32,11 +32,6 @@ const streamAskRoute = createRoute({
   responses: {
     200: {
       description: "returns the response from AI based on the given context",
-      content: {
-        "text/event-stream": {
-          schema: z.string(),
-        },
-      },
     },
     400: {
       description: "Returns an error response",
@@ -226,12 +221,16 @@ const router = new OpenAPIHono<{ Bindings: Bindings }>()
       //   },
       // });
 
-      const openai = createOpenAI({
-        apiKey: c.env.OPENAI_API_KEY,
+      const deepseekClient = createOpenAI({
+        apiKey: c.env.DEEPSEEK_API_KEY,
         baseURL: "https://api.deepseek.com/v1",
       });
+      // const openai = createOpenAI({
+      //   apiKey: c.env.OPENAI_API_KEY,
+      // });
       const result = streamText({
-        model: openai("deepseek-chat"),
+        model: deepseekClient("deepseek-chat"),
+        // model: openai("gpt-4o-mini"),
         system: SYSTEM_PROMPT_WITHOUT_CONTEXT,
         messages,
         tools: {

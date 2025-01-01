@@ -95,7 +95,7 @@ importers:
         version: 5.0.3
       next:
         specifier: 14.2.15
-        version: 14.2.15(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 14.2.15(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@18.3.1))(react@18.3.1)
       puppeteer-core:
         specifier: 22.5.0
         version: 22.5.0
@@ -103,8 +103,8 @@ importers:
         specifier: ^18
         version: 18.3.1
       react-dom:
-        specifier: ^18
-        version: 18.3.1(react@18.3.1)
+        specifier: ^19
+        version: 19.0.0(react@18.3.1)
     devDependencies:
       '@babel/preset-env':
         specifier: ^7.26.0
@@ -119,8 +119,8 @@ importers:
         specifier: ^18
         version: 18.3.18
       '@types/react-dom':
-        specifier: ^18
-        version: 18.3.5(@types/react@18.3.18)
+        specifier: ^19
+        version: 19.0.2(@types/react@18.3.18)
       autoprefixer:
         specifier: ^10.0.1
         version: 10.4.20(postcss@8.4.49)
@@ -165,19 +165,19 @@ importers:
         version: 0.469.0(react@18.3.1)
       next:
         specifier: 14.2.15
-        version: 14.2.15(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 14.2.15(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@18.3.1))(react@18.3.1)
       react:
         specifier: ^18
         version: 18.3.1
       react-dom:
-        specifier: ^18
-        version: 18.3.1(react@18.3.1)
+        specifier: ^19
+        version: 19.0.0(react@18.3.1)
       react-markdown:
         specifier: ^9.0.1
         version: 9.0.1(@types/react@18.3.18)(react@18.3.1)
       react-shiki:
         specifier: ^0.1.2
-        version: 0.1.2(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 0.1.2(@types/react@18.3.18)(react-dom@19.0.0(react@18.3.1))(react@18.3.1)
       remark-breaks:
         specifier: ^4.0.0
         version: 4.0.0
@@ -201,8 +201,8 @@ importers:
         specifier: ^18
         version: 18.3.18
       '@types/react-dom':
-        specifier: ^18
-        version: 18.3.5(@types/react@18.3.18)
+        specifier: ^19
+        version: 19.0.2(@types/react@18.3.18)
       eslint:
         specifier: ^9
         version: 9.17.0(jiti@1.21.7)
@@ -2147,10 +2147,10 @@ packages:
   '@types/prop-types@15.7.14':
     resolution: {integrity: sha512-gNMvNH49DJ7OJYv+KAKn0Xp45p8PLl6zo2YnvDIbTd4J6MER2BmWN49TG7n9LvkyihINxeKW8+3bfS2yDC9dzQ==}
 
-  '@types/react-dom@18.3.5':
-    resolution: {integrity: sha512-P4t6saawp+b/dFrUr2cvkVsfvPguwsxtH6dNIYRllMsefqFzkZk5UIjzyDOv5g1dXIPdG4Sp1yCR4Z6RCUsG/Q==}
+  '@types/react-dom@19.0.2':
+    resolution: {integrity: sha512-c1s+7TKFaDRRxr1TxccIX2u7sfCnc3RxkVyBIUA2lCpyqCF+QoAwQ/CBg7bsMdVwP120HEH143VQezKtef5nCg==}
     peerDependencies:
-      '@types/react': ^18.0.0
+      '@types/react': ^19.0.0
 
   '@types/react@18.3.18':
     resolution: {integrity: sha512-t4yC+vtgnkYjNSKlFx1jkAhH8LgTo2N/7Qvi83kdEaUtMDiwpbLAktKDaAMlRcJ5eSxZkH74eEGt1ky31d7kfQ==}
@@ -4590,10 +4590,10 @@ packages:
   randombytes@2.1.0:
     resolution: {integrity: sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==}
 
-  react-dom@18.3.1:
-    resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
+  react-dom@19.0.0:
+    resolution: {integrity: sha512-4GV5sHFG0e/0AD4X+ySy6UJd3jVl1iNsNHdpad0qhABJ11twS3TTBnseqsKurKcsNqCEFeGL3uLpVChpIO3QfQ==}
     peerDependencies:
-      react: ^18.3.1
+      react: ^19.0.0
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -4763,8 +4763,8 @@ packages:
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
 
-  scheduler@0.23.2:
-    resolution: {integrity: sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==}
+  scheduler@0.25.0:
+    resolution: {integrity: sha512-xFVuu11jh+xcO7JOAGJNOXld8/TcEHK/4CituBUeUb5hqxJLj9YuemAEuvm9gQ/+pgXYfbQuqAkiYu+u7YEsNA==}
 
   schema-utils@3.3.0:
     resolution: {integrity: sha512-pN/yOAvcC+5rQ5nERGuwrjLlYvLTbCibnZ1I7B1LaiAz9BRBlE9GMgE/eqV30P7aJQUf7Ddimy/RsbYO/GrVGg==}
@@ -7192,7 +7192,7 @@ snapshots:
 
   '@types/prop-types@15.7.14': {}
 
-  '@types/react-dom@18.3.5(@types/react@18.3.18)':
+  '@types/react-dom@19.0.2(@types/react@18.3.18)':
     dependencies:
       '@types/react': 18.3.18
 
@@ -9728,7 +9728,7 @@ snapshots:
 
   netmask@2.0.2: {}
 
-  next@14.2.15(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  next@14.2.15(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@18.3.1))(react@18.3.1):
     dependencies:
       '@next/env': 14.2.15
       '@swc/helpers': 0.5.5
@@ -9737,7 +9737,7 @@ snapshots:
       graceful-fs: 4.2.11
       postcss: 8.4.31
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 19.0.0(react@18.3.1)
       styled-jsx: 5.1.1(@babel/core@7.26.0)(react@18.3.1)
     optionalDependencies:
       '@next/swc-darwin-arm64': 14.2.15
@@ -10139,11 +10139,10 @@ snapshots:
     dependencies:
       safe-buffer: 5.2.1
 
-  react-dom@18.3.1(react@18.3.1):
+  react-dom@19.0.0(react@18.3.1):
     dependencies:
-      loose-envify: 1.4.0
       react: 18.3.1
-      scheduler: 0.23.2
+      scheduler: 0.25.0
 
   react-is@16.13.1: {}
 
@@ -10166,12 +10165,12 @@ snapshots:
 
   react-property@2.0.2: {}
 
-  react-shiki@0.1.2(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-shiki@0.1.2(@types/react@18.3.18)(react-dom@19.0.0(react@18.3.1))(react@18.3.1):
     dependencies:
       clsx: 2.1.1
       html-react-parser: 5.2.2(@types/react@18.3.18)(react@18.3.1)
       react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 19.0.0(react@18.3.1)
       shiki: 1.24.4
     transitivePeerDependencies:
       - '@types/react'
@@ -10389,9 +10388,7 @@ snapshots:
 
   safer-buffer@2.1.2: {}
 
-  scheduler@0.23.2:
-    dependencies:
-      loose-envify: 1.4.0
+  scheduler@0.25.0: {}
 
   schema-utils@3.3.0:
     dependencies:

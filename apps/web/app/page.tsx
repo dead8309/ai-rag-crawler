@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { Site } from "@/types/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlusIcon } from "lucide-react";
+import { client } from "@/lib/client";
 
-async function fetchSites(): Promise<Site[]> {
-  const response = await fetch("http://localhost:8787/api/sites");
+async function fetchSites() {
+  const response = await client.api.sites.$get();
   if (!response.ok) {
     throw new Error("Failed to fetch sites");
   }

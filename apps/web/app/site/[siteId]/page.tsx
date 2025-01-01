@@ -1,34 +1,39 @@
-import { SiteDetails } from "@/types/api";
 import { redirect } from "next/navigation";
 import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { AiChat } from "@/components/chat";
+import { client } from "@/lib/client";
 
-async function fetchSiteDetails(siteId: number): Promise<SiteDetails> {
-  const response = await fetch(`http://localhost:8787/api/sites/${siteId}`);
+async function fetchSiteDetails(siteId: number) {
+  const response = await client.api.sites[":id"].$get({
+    param: {
+      id: siteId,
+    },
+  });
   if (!response.ok) {
     throw new Error("Failed to fetch site details");
   }
   return response.json();
 }
 
-// async function fetchWorkflowStatus(
-//   workflowId: string
-// ): Promise<WorkflowStatus> {
-//   const response = await fetch(`/api/scrape/workflow/${workflowId}`);
-//   if (!response.ok) {
+// async function fetchWorkflowStatus(workflowId: string) {
+//   const res = await client.api.scrape.workflow[":id"].$get({
+//     param: {
+//       id: workflowId,
+//     },
+//   });
+//   if (!res.ok) {
 //     throw new Error("Failed to fetch workflow status");
 //   }
-//   return response.json();
+//   return res.json();
 // }
 //
-
 export default async function SitePage({
   params,
 }: {

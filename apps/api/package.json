@@ -1,6 +1,14 @@
 {
   "name": "@repo/api",
   "description": "AI pipeline built with the honc and workers-ai. vector embeddings, web scraping and processing with Cloudflare Workflows (beta)",
+  "exports": {
+    ".": {
+      "import": {
+        "default": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
+    }
+  },
   "scripts": {
     "dev": "wrangler dev src/index.ts",
     "deploy": "wrangler deploy --minify src/index.ts",
@@ -8,6 +16,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:setup": "npm run db:generate && npm run db:migrate",
     "db:studio": "drizzle-kit studio",
+    "build": "tsc -p tsconfig.build.json",
     "fiberplane": "npx @fiberplane/studio@latest"
   },
   "dependencies": {

@@ -1,8 +1,7 @@
 export const AI_MODELS = {
-  embeddings: "@cf/baai/bge-large-en-v1.5" as BaseAiTextEmbeddingsModels,
-  text_generation:
-    "@cf/meta/llama-3.3-70b-instruct-fp8-fast" as BaseAiTextGenerationModels,
-} as const;
+  embeddings: "@cf/baai/bge-large-en-v1.5",
+  text_generation: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+} as const
 
 export const SYSTEM_PROMPT = `You are a helpful and knowledgeable assistant specializing in retrieving accurate information. Before answering any question, always check your knowledge base or use the context provided. Follow these guidelines:
 

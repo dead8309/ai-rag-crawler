@@ -70,8 +70,8 @@ importers:
         specifier: ^0.30.1
         version: 0.30.1
       drizzle-seed:
-        specifier: ^0.2.1
-        version: 0.2.1(drizzle-orm@0.38.3(@cloudflare/workers-types@4.20241224.0)(@neondatabase/serverless@0.10.4)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@types/react@18.3.18)(react@19.0.0))
+        specifier: ^0.3.0
+        version: 0.3.0(drizzle-orm@0.38.3(@cloudflare/workers-types@4.20241224.0)(@neondatabase/serverless@0.10.4)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@types/react@18.3.18)(react@19.0.0))
       tsx:
         specifier: ^4.19.2
         version: 4.19.2
@@ -3009,8 +3009,8 @@ packages:
       sqlite3:
         optional: true
 
-  drizzle-seed@0.2.1:
-    resolution: {integrity: sha512-PbIhPf/gsUYj/TLD0YiTAPj4GJjzavCvwgjFWHZtbcGAwysFVxcVkgTYbszAYyg5qPdeCMR5cxRACTATsyU+Iw==}
+  drizzle-seed@0.3.0:
+    resolution: {integrity: sha512-8WSt1WdtYWqClsCxKeAmU/bw8X+weYtuA/h8M3gVc8LiHU2AZX5ZUnvUxwdBsP+SkN26ARGhmU0XIJ2OEmHmfA==}
     peerDependencies:
       drizzle-orm: '>=0.36.4'
     peerDependenciesMeta:
@@ -8091,7 +8091,7 @@ snapshots:
       '@types/react': 18.3.18
       react: 19.0.0
 
-  drizzle-seed@0.2.1(drizzle-orm@0.38.3(@cloudflare/workers-types@4.20241224.0)(@neondatabase/serverless@0.10.4)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@types/react@18.3.18)(react@19.0.0)):
+  drizzle-seed@0.3.0(drizzle-orm@0.38.3(@cloudflare/workers-types@4.20241224.0)(@neondatabase/serverless@0.10.4)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@types/react@18.3.18)(react@19.0.0)):
     dependencies:
       pure-rand: 6.1.0
     optionalDependencies:
@@ -8389,7 +8389,7 @@ snapshots:
       '@typescript-eslint/parser': 6.21.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2)
       eslint: 9.17.0(jiti@1.21.7)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.7.0(eslint-plugin-import@2.31.0(eslint@9.17.0(jiti@1.21.7)))(eslint@9.17.0(jiti@1.21.7))
+      eslint-import-resolver-typescript: 3.7.0(eslint-plugin-import@2.31.0)(eslint@9.17.0(jiti@1.21.7))
       eslint-plugin-import: 2.31.0(@typescript-eslint/parser@6.21.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2))(eslint-import-resolver-typescript@3.7.0)(eslint@9.17.0(jiti@1.21.7))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.17.0(jiti@1.21.7))
       eslint-plugin-react: 7.37.3(eslint@9.17.0(jiti@1.21.7))
@@ -8409,7 +8409,7 @@ snapshots:
       '@typescript-eslint/parser': 6.21.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2)
       eslint: 9.17.0(jiti@1.21.7)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.7.0(eslint-plugin-import@2.31.0(eslint@9.17.0(jiti@1.21.7)))(eslint@9.17.0(jiti@1.21.7))
+      eslint-import-resolver-typescript: 3.7.0(eslint-plugin-import@2.31.0)(eslint@9.17.0(jiti@1.21.7))
       eslint-plugin-import: 2.31.0(@typescript-eslint/parser@6.21.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2))(eslint-import-resolver-typescript@3.7.0)(eslint@9.17.0(jiti@1.21.7))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.17.0(jiti@1.21.7))
       eslint-plugin-react: 7.37.3(eslint@9.17.0(jiti@1.21.7))
@@ -8429,7 +8429,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.7.0(eslint-plugin-import@2.31.0(eslint@9.17.0(jiti@1.21.7)))(eslint@9.17.0(jiti@1.21.7)):
+  eslint-import-resolver-typescript@3.7.0(eslint-plugin-import@2.31.0)(eslint@9.17.0(jiti@1.21.7)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.0
@@ -8452,7 +8452,7 @@ snapshots:
       '@typescript-eslint/parser': 6.21.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2)
       eslint: 9.17.0(jiti@1.21.7)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.7.0(eslint-plugin-import@2.31.0(eslint@9.17.0(jiti@1.21.7)))(eslint@9.17.0(jiti@1.21.7))
+      eslint-import-resolver-typescript: 3.7.0(eslint-plugin-import@2.31.0)(eslint@9.17.0(jiti@1.21.7))
     transitivePeerDependencies:
       - supports-color
 

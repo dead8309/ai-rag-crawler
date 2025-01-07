@@ -34,7 +34,7 @@
     "autoprefixer": "^10.0.1",
     "babel-loader": "^9.2.1",
     "eslint": "^9",
-    "eslint-config-next": "14.1.4",
+    "eslint-config-next": "15.1.4",
     "typescript": "^5"
   }
 }

@@ -12,8 +12,8 @@ importers:
         specifier: ^4.20241205.0
         version: 4.20241224.0
       '@types/node':
-        specifier: ^22.10.2
-        version: 22.10.2
+        specifier: ^22.10.6
+        version: 22.10.6
       turbo:
         specifier: ^2.3.3
         version: 2.3.3
@@ -2146,6 +2146,9 @@ packages:
 
   '@types/node@22.10.2':
     resolution: {integrity: sha512-Xxr6BBRCAOQixvonOye19wnzyDiUtTeqldOOmj3CkeblonbccA12PFwlufvRdrpjXxqnmUaeiU5EOA+7s5diUQ==}
+
+  '@types/node@22.10.6':
+    resolution: {integrity: sha512-qNiuwC4ZDAUNcY47xgaSuS92cjf8JbSUoaKS77bmLG1rU7MlATVSiw/IlrjtIyyskXBZ8KkNfjK/P5na7rgXbQ==}
 
   '@types/pg@8.11.6':
     resolution: {integrity: sha512-/2WmmBXHLsfRqzfHW7BNZ8SbYzE8OSk7i3WjFYvfgRHj7S1xj+16Je5fUKv3lVdVzk/zn9TXOqf+avFCFIE0yQ==}
@@ -7190,6 +7193,10 @@ snapshots:
       undici-types: 5.26.5
 
   '@types/node@22.10.2':
+    dependencies:
+      undici-types: 6.20.0
+
+  '@types/node@22.10.6':
     dependencies:
       undici-types: 6.20.0
 

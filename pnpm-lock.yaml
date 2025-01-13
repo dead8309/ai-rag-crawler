@@ -48,8 +48,8 @@ importers:
         specifier: ^4.6.7
         version: 4.6.15
       langchain:
-        specifier: ^0.3.9
-        version: 0.3.9(@langchain/core@0.3.26(openai@4.77.0(zod@3.24.1)))(cheerio@1.0.0)(openai@4.77.0(zod@3.24.1))
+        specifier: ^0.3.11
+        version: 0.3.11(@langchain/core@0.3.26(openai@4.77.0(zod@3.24.1)))(cheerio@1.0.0)(openai@4.77.0(zod@3.24.1))
       p-limit:
         specifier: ^6.1.0
         version: 6.2.0
@@ -3846,8 +3846,8 @@ packages:
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
-  langchain@0.3.9:
-    resolution: {integrity: sha512-uteRutI03Bt9f53nZmx8mWfJXkf6VlFVRuOprRJ0mWdCpkTP359sxrH4v6w4TokLiziPC/aMay662kmOz0dHlA==}
+  langchain@0.3.11:
+    resolution: {integrity: sha512-PgAG4ZLeuSRkKsyf98cmWGdwKv3I1hOFC8a4fr7e+bm7E+F6Fx6xUkgbuC78ff0N/Cjs5BBryZIFMrqoKPqsvg==}
     engines: {node: '>=18'}
     peerDependencies:
       '@langchain/anthropic': '*'
@@ -3857,6 +3857,7 @@ packages:
       '@langchain/core': '>=0.2.21 <0.4.0'
       '@langchain/google-genai': '*'
       '@langchain/google-vertexai': '*'
+      '@langchain/google-vertexai-web': '*'
       '@langchain/groq': '*'
       '@langchain/mistralai': '*'
       '@langchain/ollama': '*'
@@ -3877,6 +3878,8 @@ packages:
       '@langchain/google-genai':
         optional: true
       '@langchain/google-vertexai':
+        optional: true
+      '@langchain/google-vertexai-web':
         optional: true
       '@langchain/groq':
         optional: true
@@ -9209,7 +9212,7 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  langchain@0.3.9(@langchain/core@0.3.26(openai@4.77.0(zod@3.24.1)))(cheerio@1.0.0)(openai@4.77.0(zod@3.24.1)):
+  langchain@0.3.11(@langchain/core@0.3.26(openai@4.77.0(zod@3.24.1)))(cheerio@1.0.0)(openai@4.77.0(zod@3.24.1)):
     dependencies:
       '@langchain/core': 0.3.26(openai@4.77.0(zod@3.24.1))
       '@langchain/openai': 0.3.16(@langchain/core@0.3.26(openai@4.77.0(zod@3.24.1)))

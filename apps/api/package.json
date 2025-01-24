@@ -17,7 +17,8 @@
     "db:setup": "npm run db:generate && npm run db:migrate",
     "db:studio": "drizzle-kit studio",
     "build": "tsc -p tsconfig.build.json",
-    "fiberplane": "npx @fiberplane/studio@latest"
+    "fiberplane": "npx @fiberplane/studio@latest",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.11",

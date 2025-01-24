@@ -28,6 +28,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Check Types
+      - name: Build Shared Packages
+        run: pnpm build --filter=@repo/shared
+
+      - name: Build Shared
         run: pnpm type-check
 

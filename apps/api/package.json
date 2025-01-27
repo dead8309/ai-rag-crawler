@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241205.0",
-    "@fiberplane/hono-otel": "^0.6.2",
+    "@fiberplane/hono-otel": "^0.7.0",
     "drizzle-kit": "^0.30.1",
     "drizzle-seed": "^0.2.1",
     "tsx": "^4.19.2",

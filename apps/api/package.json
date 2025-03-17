@@ -21,7 +21,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^1.0.11",
+    "@ai-sdk/openai": "^1.2.5",
     "@hono/zod-openapi": "^0.18.3",
     "@neondatabase/serverless": "^0.10.1",
     "@repo/shared": "workspace:*",

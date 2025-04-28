@@ -9,7 +9,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241205.0",
     "turbo": "^2.3.3",
-    "@types/node": "^22.10.2",
+    "@types/node": "^22.15.3",
     "typescript": "^5.5.4"
   },
   "packageManager": "pnpm@9.12.2"
